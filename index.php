@@ -1,10 +1,10 @@
 <?php
 $request = $_GET;
 
-//$user_phone = $request['contact_number'];
-//$text_body  = $request['text_message'];
-$user_phone = '09274010141';
-$text_body = 'test';
+$user_phone = $request['contact_number'];
+$text_body  = $request['text_message'];
+//$user_phone = '09274010141';
+//$text_body = 'test';
 
 include('client.php');
 

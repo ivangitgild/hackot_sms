@@ -2,7 +2,7 @@
 ini_set('error_reporting', 0);
 date_default_timezone_set();
 
-include("lib/nusoap.php");
+require_once("lib/nusoap.php");
 include('secrets.php');
 
 class SMS_CLIENT {
@@ -17,33 +17,36 @@ class SMS_CLIENT {
     }
     
     public function __send() {
-        
-        // create the client and define the URL endpoint
-        $client = new nusoap_client(URL_ENDPOINT);
-        
-        // set the character encoding, utf-8 is the standard.
-        $client->soap_defencoding = 'UTF-8';
-        
-        // check if we generated an error in creating the client / assigning the endpoint
-        $err = $client->getError();
-        if ($err) {
-            // Display the error
-            $error_message = 'Constructor error: ' . $err;
+        try{
+            // create the client and define the URL endpoint
+            $client = new nusoap_client(URL_ENDPOINT);
+            
+            // set the character encoding, utf-8 is the standard.
+            $client->soap_defencoding = 'UTF-8';
+            
+            // check if we generated an error in creating the client / assigning the endpoint
+            $err = $client->getError();
+            if ($err) {
+                // Display the error
+                $error_message = 'Constructor error: ' . $err;
+            }
+            
+            // Call the SOAP method, note the definition of the xmlnamespace as the third parameter in the call and how the posted message is added to the message string
+            
+            // Call the SOAP method, note the definition of the xmlnamespace as the third parameter in the call and how the posted message is added to the message string
+            $result = $client->call('sendSMS', array(
+                                                        'uName' => uNAME, 
+                                                        'uPin' => uPIN,
+                                                        'MSISDN' => $this->contact_number,
+                                                        'messageString' => $this->text_message,
+                                                        'Display' => '1',
+                                                        'udh' => '', 
+                                                        'mwi' => '',
+                                                        'coding' => '0'
+                                      ), "http://ESCPlatform/xsd");
+        }catch(Exception $e) {
+            var_dump($e); die();
         }
-        
-        // Call the SOAP method, note the definition of the xmlnamespace as the third parameter in the call and how the posted message is added to the message string
-        
-        $result = $client->call('sendSMS', array(
-                                                'uName' => uNAME,
-                                                'uPin'  => uPIN,
-                                                'MSISDN'    => $this->contact_number,
-                                                'messageString' => $this->text_message,
-                                                'Display'   => '1',
-                                                'udh'   => '',
-                                                'mwi'   => '',
-                                                'config'    => '0'
-                                            ),"http://ESCPlatform/xsd" );
-        
         $this->setResponse($result, $client);
     }
     
@@ -60,6 +63,7 @@ class SMS_CLIENT {
                 $response = array('result' => false, 'message' => 'An unknown error was generated: '.$err, 'error_code' => $err);
         
             } else {
+                //var_dump($client); die();
                 // Display the result
                 if ($result == "201") {
                     $response = array('result' => true, 'message' => 'Message succesfully sent');
